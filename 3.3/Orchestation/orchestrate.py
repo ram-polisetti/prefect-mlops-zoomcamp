@@ -146,3 +146,21 @@ if __name__ == "__main__":
     train_url = "https://d37ci6vzurychx.cloudfront.net/trip-data/green_tripdata_2023-01.parquet"
     val_url = "https://d37ci6vzurychx.cloudfront.net/trip-data/green_tripdata_2023-02.parquet"
     main_flow(train_url, val_url)
+
+from mlflow.tracking import MlflowClient
+
+mlflow.set_experiment("nyc-taxi-experiment")
+client = MlflowClient()
+experiment = client.get_experiment_by_name("nyc-taxi-experiment")
+
+# Get the runs for the experiment
+runs = client.search_runs(experiment_ids=experiment.experiment_id, order_by=["attribute.start_time DESC"], max_results=1)
+
+# Get the last run in the experiment
+last_run = runs[0] if runs else None
+
+if last_run:
+    # Print the logged data
+    print(last_run.data)
+else:
+    print("No runs found for this experiment.")
