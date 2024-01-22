@@ -27,7 +27,15 @@ Create another window and activate your conda environment. Start the Prefect API
 prefect server start
 ```
 
+Now navigate to another terminal and make sure that you are on same conda environment. Start the Prefect UI with 
 
+```bash
+/MachineLearning/mlops/prefect-mlops-zoomcamp$   prefect config set PREFECT_API_URL=http://127.0.0.1:4200/api
+Set 'PREFECT_API_URL' to 'http://127.0.0.1:4200/api'.
+Updated profile 'default'.
+  ```
+  
 
-## Optional: use Prefect Cloud for added capabilties
-Signup and use for free at https://app.prefect.cloud
+![Alt text](image.png)
+![Alt text](image-1.png)
+![Alt text](image-2.png)
