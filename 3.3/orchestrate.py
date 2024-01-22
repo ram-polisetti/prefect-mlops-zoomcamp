@@ -9,7 +9,7 @@ from sklearn.metrics import mean_squared_error
 import mlflow
 import xgboost as xgb
 from prefect import flow, task
-
+import requests
 
 @task(retries=3, retry_delay_seconds=2)
 def read_data(filename: str) -> pd.DataFrame:
@@ -111,13 +111,22 @@ def train_best_model(
 
 @flow
 def main_flow(
-    train_path: str = "./data/green_tripdata_2021-01.parquet",
-    val_path: str = "./data/green_tripdata_2021-02.parquet",
+    train_url = "https://d37ci6vzurychx.cloudfront.net/trip-data/green_tripdata_2023-01.parquet", 
+    val_url = "https://d37ci6vzurychx.cloudfront.net/trip-data/green_tripdata_2023-02.parquet"
 ) -> None:
     """The main training pipeline"""
-
+    for url in [train_url, val_url]:
+        response = requests.get(url)
+        file_path = f"./data/{url.split('/')[-1]}"
+        # "green_tripdata_2023-10.parquet"
+        with open(file_path, "wb") as file:
+            file.write(response.content)
+        
+    train_path: str = f"./data/{train_url.split('/')[-1]}"
+    val_path: str = f"./data/{val_url.split('/')[-1]}"
+    
     # MLflow settings
-    mlflow.set_tracking_uri("sqlite:///mlflow.db")
+    mlflow.set_tracking_uri("sqlite:///nyc_ride_duration.db")
     mlflow.set_experiment("nyc-taxi-experiment")
 
     # Load
@@ -130,6 +139,10 @@ def main_flow(
     # Train
     train_best_model(X_train, X_val, y_train, y_val, dv)
 
+    print("Finished training and Logging to MLflow")
 
 if __name__ == "__main__":
-    main_flow()
+    
+    train_url = "https://d37ci6vzurychx.cloudfront.net/trip-data/green_tripdata_2023-01.parquet"
+    val_url = "https://d37ci6vzurychx.cloudfront.net/trip-data/green_tripdata_2023-02.parquet"
+    main_flow(train_url, val_url)
